@@ -6,6 +6,7 @@
 package engine;
 
 import java.sql.*;
+import java.util.*;
 import model.Sach;
 import utils.*;
 
@@ -54,6 +55,37 @@ public class DBMainEngine {
             }
         }
         return false;
+    }
+    public List<Sach> ReadData(){
+        List<Sach> list = null;
+        String sql = "SELECT * FROM sach";
+        try{
+            PreparedStatement pre = this.con.prepareStatement(sql);
+            ResultSet rs = pre.executeQuery();
+            if(rs != null){
+                list = new ArrayList<>();
+                while(rs.next()){
+                    Sach s = new Sach();
+                    s.setId(rs.getString("id"));
+                    s.setName(rs.getString("name"));
+                    s.setQuantity(rs.getInt("quantity"));
+                    s.setType(rs.getString("type"));
+                    s.setLanguage(rs.getString("language"));
+                    s.setAbout(rs.getString("about"));
+                    s.setNxb(rs.getString("nxb"));
+                    s.setYear(rs.getInt("year"));
+                    list.add(s);
+                }
+            }
+        } catch(SQLException e){
+            e.printStackTrace();
+            try {
+                this.con.rollback();
+            } catch(SQLException e1){
+                e1.printStackTrace();
+            }
+        }
+        return list;
     }
     private boolean isExisting(Sach s){
         boolean flag = false;

@@ -5,10 +5,12 @@
 package gui;
 
 import java.awt.Color;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import model.Sach;
 import utils.*;
 import engine.DBMainEngine;
+import java.util.*;
+import javax.swing.table.DefaultTableModel;
 
 
 /**
@@ -17,17 +19,36 @@ import engine.DBMainEngine;
  */
 public class MainGUI extends javax.swing.JFrame {
 
-    /**
-     * Creates new form MainGUI
-     */
+    public DefaultTableModel tblModel;
     ConnectionPool cp = new ConnectionPool();
     DBMainEngine db = new DBMainEngine(cp);
     
     public MainGUI() {
         initComponents();
         setLocationRelativeTo(null);
+        initTable();
+        LoadDataToTable();
     }
-
+    
+    public void initTable(){
+        tblModel = new DefaultTableModel();
+        tblModel.setColumnIdentifiers(new String[]{"ID", "Tên sách", "Số lượng", "Loại", "Ngôn ngữ", "Giới thiệu", "NXB", "Năm"});
+        tblOutput.setModel(tblModel);
+    }
+    
+    public void LoadDataToTable(){
+        try {
+            List<Sach> listSach = db.ReadData();
+            tblModel.setRowCount(0);
+            for(Sach s : listSach){
+                tblModel.addRow(new Object[]{s.getId(),s.getName(),s.getQuantity(),s.getType(),s.getLanguage(),s.getAbout(),s.getNxb(),s.getYear()});
+            }
+            tblModel.fireTableDataChanged();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -70,6 +91,8 @@ public class MainGUI extends javax.swing.JFrame {
         btnXoa = new javax.swing.JButton();
         btnTimKiem = new javax.swing.JButton();
         btnKetThuc = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblOutput = new javax.swing.JTable();
 
         jTextField3.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
 
@@ -364,6 +387,26 @@ public class MainGUI extends javax.swing.JFrame {
                 .addContainerGap(29, Short.MAX_VALUE))
         );
 
+        tblOutput.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID", "Tên sách", "Số lượng", "Loại", "Ngôn ngữ", "Giới thiệu", "NXB", "Năm"
+            }
+        ));
+        tblOutput.setColumnSelectionAllowed(true);
+        tblOutput.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblOutputMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(tblOutput);
+        tblOutput.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -371,19 +414,18 @@ public class MainGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(55, 55, 55)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(385, 385, 385)
-                        .addComponent(jLabel1)))
-                .addContainerGap(46, Short.MAX_VALUE))
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(55, 55, 55)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(48, 48, 48)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane2))))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -393,10 +435,12 @@ public class MainGUI extends javax.swing.JFrame {
                 .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 14, Short.MAX_VALUE))
+                .addGap(49, 49, 49))
         );
 
         pack();
@@ -419,11 +463,9 @@ public class MainGUI extends javax.swing.JFrame {
             String soLuong = txtQuantity.getText();
             String type = (rdbKHTN.isSelected()) ? "Khoa học tự nhiên" : "Khoa học xã hội";
             String languages = "";
-            languages += (ckbEnglish.isSelected()) ? "English " : "";
-            languages += (ckbChinese.isSelected()) ? "Chinese " : "";
-            if(ckbOther.isSelected()){
-                languages += (languages.equals("")) ? "Other" : "and Other";
-            }
+            languages += (ckbEnglish.isSelected()) ? "English," : "";
+            languages += (ckbChinese.isSelected()) ? "Chinese," : "";
+            languages += (ckbOther.isSelected()) ? "Other" : "";
             if(languages.equals(""))
                 languages = "Không";
             String about = txtAbout.getText();
@@ -477,11 +519,9 @@ public class MainGUI extends javax.swing.JFrame {
             String soLuong = txtQuantity.getText();
             String type = (rdbKHTN.isSelected()) ? "Khoa học tự nhiên" : "Khoa học xã hội";
             String languages = "";
-            languages += (ckbEnglish.isSelected()) ? "English " : "";
-            languages += (ckbChinese.isSelected()) ? "Chinese " : "";
-            if(ckbOther.isSelected()){
-                languages += (languages.equals("")) ? "Other" : "and Other";
-            }
+            languages += (ckbEnglish.isSelected()) ? "English," : "";
+            languages += (ckbChinese.isSelected()) ? "Chinese," : "";
+            languages += (ckbOther.isSelected()) ? "Other" : "";
             if(languages.equals(""))
                 languages = "Không";
             String about = txtAbout.getText();
@@ -498,6 +538,7 @@ public class MainGUI extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Thêm sách không thành công!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
+            LoadDataToTable();
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
@@ -512,18 +553,16 @@ public class MainGUI extends javax.swing.JFrame {
         DataValidator.ValidateButtonGroup(btnGrType, sb, "Vui lòng chọn Loại sách!\n");
         
         if(sb.length() > 0){
-            
+            JOptionPane.showMessageDialog(this, sb.toString(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         } else {
             String id = txtID.getText();
             String name = txtName.getText();
             String soLuong = txtQuantity.getText();
             String type = (rdbKHTN.isSelected()) ? "Khoa học tự nhiên" : "Khoa học xã hội";
             String languages = "";
-            languages += (ckbEnglish.isSelected()) ? "English " : "";
-            languages += (ckbChinese.isSelected()) ? "Chinese " : "";
-            if(ckbOther.isSelected()){
-                languages += (languages.equals("")) ? "Other" : "and Other";
-            }
+            languages += (ckbEnglish.isSelected()) ? "English," : "";
+            languages += (ckbChinese.isSelected()) ? "Chinese," : "";
+            languages += (ckbOther.isSelected()) ? "Other" : "";
             if(languages.equals(""))
                 languages = "Không";
             String about = txtAbout.getText();
@@ -540,6 +579,7 @@ public class MainGUI extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Sửa sách không thành công!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
+            LoadDataToTable();
         }
     }//GEN-LAST:event_btnSuaActionPerformed
 
@@ -559,6 +599,7 @@ public class MainGUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Xóa sách không thành công!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
+        LoadDataToTable();
     }//GEN-LAST:event_btnXoaActionPerformed
 
     private void btnTimKiemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTimKiemActionPerformed
@@ -583,6 +624,39 @@ public class MainGUI extends javax.swing.JFrame {
     private void btnKetThucActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKetThucActionPerformed
         System.exit(0);
     }//GEN-LAST:event_btnKetThucActionPerformed
+
+    private void tblOutputMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblOutputMouseClicked
+        // TODO add your handling code here:
+        int selectedRow = tblOutput.getSelectedRow();
+        txtID.setText(tblOutput.getValueAt(selectedRow, 0).toString());
+        txtName.setText(tblOutput.getValueAt(selectedRow, 1).toString());
+        txtQuantity.setText(tblOutput.getValueAt(selectedRow, 2).toString());
+        String type = tblOutput.getValueAt(selectedRow, 3).toString();
+        if(type.equals("Khoa học tự nhiên"))
+            rdbKHTN.setSelected(true);
+        if(type.equals("Khoa học xã hội"))
+            rdbKHXH.setSelected(true);
+        String languages = tblOutput.getValueAt(selectedRow, 4).toString();
+        String[] arrLanguages = languages.split(",");
+        ckbEnglish.setSelected(false);
+        ckbChinese.setSelected(false);
+        ckbOther.setSelected(false);
+        for (String arrLanguage : arrLanguages) {
+            if(arrLanguage.equals("English")){
+                ckbEnglish.setSelected(true);
+            }
+            
+            if(arrLanguage.equals("Chinese"))
+                ckbChinese.setSelected(true);
+            
+            if(arrLanguage.equals("Other"))
+                ckbOther.setSelected(true);
+        }
+        txtAbout.setText(tblOutput.getValueAt(selectedRow, 5).toString());
+        cbbNXB.setSelectedItem(tblOutput.getValueAt(selectedRow, 6).toString());
+        cbbYear.setSelectedItem(tblOutput.getValueAt(selectedRow, 7).toString());
+        
+    }//GEN-LAST:event_tblOutputMouseClicked
 
     /**
      * @param args the command line arguments
@@ -645,9 +719,11 @@ public class MainGUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JRadioButton rdbKHTN;
     private javax.swing.JRadioButton rdbKHXH;
+    private javax.swing.JTable tblOutput;
     private javax.swing.JTextField txtAbout;
     private javax.swing.JTextArea txtAreaOutput;
     private javax.swing.JTextField txtID;

@@ -4,6 +4,7 @@ model\Sach.class
 gui\MainGUI$5.class
 gui\MainGUI$4.class
 utils\DataValidator.class
+gui\MainGUI$12.class
 gui\MainGUI$9.class
 com\javanangcao\tx1\TX1.class
 gui\MainGUI$8.class
